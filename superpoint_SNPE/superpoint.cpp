@@ -116,19 +116,22 @@ void Superpoint::extract_points(std::vector<std::vector<float>> &kps, zdl::DlSys
     zdl::DlSystem::ITensor::iterator outputHeatmap_ptr = outputHeatmap->begin();
     //each keypoint has three elements, hm_width, hm_height, confidence
     int block_size = int(sqrt(hm_channel));
-    for (int h=0; h<hm_height; h++)
-    {
-        for (int w=0; w<hm_width; w++)
-        {
-            for (int c=0; c<hm_channel; c++)
-            {
-                int reshape_h = h*block_size+int(c/block_size);
-                int reshape_w = w*block_size+(c%block_size);
-                int index = c+w*hm_channel+h*hm_channel*hm_width;
+    for (int c = 0; c < hm_channel; c++) {
+        for (int h = 0; h < hm_height; h++) {
+            
+            int reshape_h = h * block_size + int(c / block_size);
+
+            for (int w = 0; w < hm_width; w++) {
+                int reshape_w = w * block_size + (c % block_size);
+
+                //int index = c + w * hm_channel + h * hm_channel * hm_width;
+                int index = w + h * hm_width + c * hm_height * hm_width;
+
                 reshape_hm[reshape_h][reshape_w] = outputHeatmap_ptr[index];
-                if (outputHeatmap_ptr[index] > threshold)  
-                {
-                    std::vector<float> temp = {float(reshape_w), float(reshape_h), outputHeatmap_ptr[index]};
+                if (outputHeatmap_ptr[index] > threshold) {
+                    std::vector<float> temp = {float(reshape_w),
+                                               float(reshape_h),
+                                               outputHeatmap_ptr[index]};
                     kps.push_back(temp);
                 }
             }
